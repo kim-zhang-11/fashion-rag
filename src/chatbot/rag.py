@@ -2,10 +2,10 @@ from langchain_core.documents import Document
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.runnables import RunnablePassthrough, RunnableLambda
 from langchain_core.runnables.history import RunnableWithMessageHistory
-from file_history_store import get_history
-from vector_stores import VectorStoreService
+from .history import get_history
+from ..knowledge_base.vector_store import VectorStoreService
 from langchain_community.embeddings import DashScopeEmbeddings
-import config_data as config
+from ..config import embedding_model_name, chat_model_name
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_community.chat_models.tongyi import ChatTongyi
 
@@ -22,7 +22,7 @@ class RagService(object):
     def __init__(self):
 
         self.vector_service = VectorStoreService(
-            embedding=DashScopeEmbeddings(model=config.embedding_model_name)
+            embedding=DashScopeEmbeddings(model=embedding_model_name)
         )
 
         self.prompt_template = ChatPromptTemplate.from_messages(
@@ -33,7 +33,7 @@ class RagService(object):
             ]
         )
 
-        self.chat_model = ChatTongyi(model=config.chat_model_name)
+        self.chat_model = ChatTongyi(model=chat_model_name)
 
         self.chain = self.__get_chain()
 
@@ -84,11 +84,7 @@ class RagService(object):
 
 if __name__ == '__main__':
     # session id 配置
-    session_config ={
-        "configurable":{
-            "session_id":"user_001",
-        }
-    }
+    from ..config import session_config
     res = RagService().chain.invoke({"input":"我之前问了什么"},session_config)
     print(res)
 

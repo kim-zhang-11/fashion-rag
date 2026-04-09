@@ -1,6 +1,6 @@
 import streamlit as  st
-from rag import RagService
-import config_data as config
+from src.chatbot.rag import RagService
+from src import config
 import time
 
 # 标题

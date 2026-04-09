@@ -47,4 +47,3 @@ class FileChatMessageHistory(BaseChatMessageHistory):
         with open(self.file_path,"w",encoding="utf-8")as f:
                 json.dump([],f)
 
-

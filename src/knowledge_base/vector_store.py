@@ -1,5 +1,5 @@
 from langchain_chroma import Chroma
-import config_data as config
+from ..config import collection_name, persist_directory, similarity_threshold
 
 class VectorStoreService(object):
     def __init__(self,embedding):
@@ -9,14 +9,14 @@ class VectorStoreService(object):
         self.embedding= embedding
 
         self.vector_store = Chroma(
-            collection_name=config.collection_name,
+            collection_name=collection_name,
             embedding_function=self.embedding,
-            persist_directory=config.persist_directory,
+            persist_directory=persist_directory,
         )
 
     def get_retriever(self):
             """返回向量检索器，方便加入chain"""
-            return self.vector_store.as_retriever(search_kwargs={"k": config.similarity_threshold})
+            return self.vector_store.as_retriever(search_kwargs={"k": similarity_threshold})
 
 if __name__ =='__main__':
         from langchain_community.embeddings import DashScopeEmbeddings

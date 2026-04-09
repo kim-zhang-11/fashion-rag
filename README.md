@@ -32,15 +32,21 @@ Perfect for getting started with local knowledge base Q&A and RAG retrieval-augm
 
 ```text
 FashionRAG/
-├─ app_upload.py              # Knowledge base upload service (Streamlit)
-├─ app_chat.py                # Smart Q&A service (Streamlit)
-├─ knowledge_base.py          # Knowledge base processing: read, split, write, deduplicate
-├─ rag.py                     # RAG chain assembly
-├─ vector_stores.py           # Vector database retrieval wrapper (persistence)
-├─ file_history_store.py      # Session history storage
-├─ config_data.py             # Model, path, chunk and other parameter configuration
+├─ app_upload.py              # Knowledge base upload service (Streamlit) - Entry point
+├─ app_chat.py                # Smart Q&A service (Streamlit) - Entry point
 ├─ requirements.txt           # Project dependencies (environment setup)
-└─ assets/                    # Location for README demo images and sample text materials
+├─ assets/                    # Location for README demo images and sample text materials
+├─ chat_history/              # Chat history storage directory
+├─ chroma_db/                 # Chroma vector database (local persistence)
+├─ md5.text                   # MD5 deduplication records
+└─ src/                       # Source code package
+    ├─ config.py              # Model, path, chunk and other parameter configuration
+    ├─ chatbot/               # Chatbot module
+    │  ├─ rag.py              # RAG chain assembly
+    │  └─ history.py          # Session history storage
+    └─ knowledge_base/        # Knowledge base module
+       ├─ base.py             # Knowledge base processing: read, split, write, deduplicate
+       └─ vector_store.py     # Vector database retrieval wrapper (persistence)
 ```
 ---
 ## ✅ Environment Setup
@@ -54,7 +60,7 @@ pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
 
 ## ⚙️ Configuration Guide
 
-- Core configuration is in `config_data.py`, manually modify model configuration, chunk size, etc. as needed
+- Core configuration is in `src/config.py`, manually modify model configuration, chunk size, etc. as needed
 - Default embedder: text-embedding-v4 and Qwen3-max
 - Note: DashScope/Qwen related API Keys (e.g., DASHSCOPE_API_KEY) need to be configured in environment variables first
 ---
@@ -89,7 +95,7 @@ streamlit run app_chat.py
 
 ### Q3: How to handle path or configuration errors when running the project?
 #### Recommended checks:
-- Verify model configuration and path configuration in `config_data.py` are correct
+- Verify model configuration and path configuration in `src/config.py` are correct
 - Check if local data directories exist
 - Verify API Keys are configured in environment variables
 

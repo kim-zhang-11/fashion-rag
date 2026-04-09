@@ -7,7 +7,7 @@ import streamlit as st
 import time
 
 
-from knowledge_base import KnowledgeBaseService
+from src.knowledge_base.base import KnowledgeBaseService
 
 
 # 添加网页标题
