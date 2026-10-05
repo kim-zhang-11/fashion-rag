@@ -3,39 +3,39 @@ from src.chatbot.rag import RagService
 from src import config
 import time
 
-# 标题
+# title
 st.title("智能客服")
-# 分隔符
+# divider
 st.divider()
 
-# 避免性能压力，session_state 存入对象
+# keep the objects in session_state to avoid the cost of rebuilding them
 if "message" not in st.session_state:
     st.session_state["message"]=[{"role":"assistant","content":"你好，有什么可以帮助你？"}]
 
 if "rag" not in st.session_state:
     st.session_state["rag"]= RagService()
-#循环 输出历史信息，原本只记录但页面不显示
+# loop over and render the history, which would otherwise be recorded but not shown on the page
 for message in st.session_state["message"]:
     st.chat_message(message["role"]).write(message["content"])
-# 在页面最下方提供用户输入栏
+# user input box at the bottom of the page
 prompt= st.chat_input()
 
 if prompt :
-    # 在页面输出用户的提问
+    # render the user's question on the page
     st.chat_message("user").write(prompt)
     st.session_state["message"].append({"role":"user","content":prompt})
 
     ai_res_list= []
     with st.spinner("AI 思考中......."):
-        # 调用 RAG服务
+        # call the RAG service
 
-        # 直接输出
+        # direct (non-streaming) output
         # res= st.session_state["rag"].chain.invoke({"input":prompt},config.session_config)
         #
         # st.chat_message("assistant").write(res)
         # st.session_state["message"].append({"role":"assistant","content":res})
 
-        # 流式输出
+        # streaming output
         res_stream = st.session_state["rag"].chain.stream({"input": prompt}, config.session_config)
 
         def capture(generator, cache_list):

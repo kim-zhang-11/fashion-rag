@@ -4,7 +4,7 @@ from ..config import collection_name, persist_directory, similarity_threshold
 class VectorStoreService(object):
     def __init__(self,embedding):
         """
-        :param embedding: 嵌入模型的传入
+        :param embedding: the embedding model to use
         """
         self.embedding= embedding
 
@@ -15,7 +15,7 @@ class VectorStoreService(object):
         )
 
     def get_retriever(self):
-            """返回向量检索器，方便加入chain"""
+            """Return the vector retriever so it can be plugged into a chain"""
             return self.vector_store.as_retriever(search_kwargs={"k": similarity_threshold})
 
 if __name__ =='__main__':

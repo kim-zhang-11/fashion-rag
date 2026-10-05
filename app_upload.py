@@ -1,7 +1,7 @@
 """
-基于Streamlit完成WEB网页上传服务
+Web upload service built on Streamlit
 
-Streamlit ： 当WEB页面元素变化，则代码重新执行一遍，无法维护状态
+Streamlit: whenever a page element changes the script reruns from the top, so state is not kept
 """
 import streamlit as st
 import time
@@ -10,23 +10,23 @@ import time
 from src.knowledge_base.base import KnowledgeBaseService
 
 
-# 添加网页标题
+# add the page title
 st.title("知识库更新服务")
 
 # file_uploader
 uploader_files=st.file_uploader(
     "请上传TXT文件",
     type=['txt'],
-    accept_multiple_files=True,   # True表示接受多个文件的上传
+    accept_multiple_files=True,   # True allows uploading multiple files
 )
 
-if "service" not in st.session_state:          # 会话状态字典，session_state本身也是字典
+if "service" not in st.session_state:          # session state dict; session_state itself is a dict too
     st.session_state["service"]=KnowledgeBaseService()
 
 if uploader_files is not None and len(uploader_files) > 0:
-    # 逐个处理每个上传的文件
+    # process each uploaded file one by one
     for uploader_file in uploader_files:
-        # 提取文件信息
+        # extract the file info
         file_name = uploader_file.name
         file_type = uploader_file.type
         file_size = uploader_file.size /1024
@@ -36,7 +36,7 @@ if uploader_files is not None and len(uploader_files) > 0:
         # get_value -> bytes -> decode("utf-8")
         text=uploader_file.getvalue().decode("utf-8")
 
-        with st.spinner(f"载入知识库中...({file_name})"):     # 在 spinner内的代码执行过程中，会有一个转圈动画，优化用户体验
+        with st.spinner(f"载入知识库中...({file_name})"):     # a spinner animation shows while the code inside runs, for a better user experience
             time.sleep(1)
             result= st.session_state["service"].upload_by_str(text,file_name)
             st.write(result)

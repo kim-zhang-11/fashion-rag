@@ -14,10 +14,10 @@ chunk_size= 1000
 chunk_overlap= 100
 separators =["\n\n","\n",".","!","?","。","！","？"," ",""]
 
-max_spliter_char_number= 1000  # 文本分割阈值
+max_spliter_char_number= 1000  # text splitting threshold
 
-# 相似度K值
-similarity_threshold =1     # 检索返回匹配的文档数量
+# top-K for similarity search
+similarity_threshold =1     # number of matching documents returned by retrieval
 
 embedding_model_name="text-embedding-v4"
 chat_model_name="qwen3-max"

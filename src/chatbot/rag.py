@@ -38,7 +38,7 @@ class RagService(object):
         self.chain = self.__get_chain()
 
     def __get_chain(self):
-        """获取最终的执行链"""
+        """Build the final chain to execute"""
 
         retriever = self.vector_service.get_retriever()
 
@@ -72,7 +72,7 @@ class RagService(object):
             }| RunnableLambda(format_for_prompt_template) |self.prompt_template | print_prompt |self.chat_model | StrOutputParser()
         )
 
-        conversation_chain = RunnableWithMessageHistory(       # 增强的链
+        conversation_chain = RunnableWithMessageHistory(       # the chain enhanced with history
             chain,
             get_history,
             input_messages_key="input",
@@ -83,7 +83,7 @@ class RagService(object):
 
 
 if __name__ == '__main__':
-    # session id 配置
+    # session id config
     from ..config import session_config
     res = RagService().chain.invoke({"input":"我之前问了什么"},session_config)
     print(res)
