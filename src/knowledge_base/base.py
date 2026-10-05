@@ -4,6 +4,7 @@ from ..config import (collection_name, persist_directory, chunk_size,
                       md5_path, session_config)
 from langchain_community.embeddings import DashScopeEmbeddings
 from langchain_text_splitters import RecursiveCharacterTextSplitter
+from .splitter import split_by_heading, format_heading_path
 from datetime import datetime
 import os
 import hashlib
@@ -59,16 +60,40 @@ class KnowledgeBaseService(object):
             length_function=len,                      # 使用python自带的len函数做长度统计的依赖
         )      # 文本分割器的对象
 
+    def split_coarse(self,data:str)->list[tuple[str,dict]]:
+        """粗粒度切分：按长度切，return [(文本段, 文本段的元数据), ...]"""
+        if len(data) > max_spliter_char_number:
+            knowledge_chunks:list[str]=self.spliter.split_text(data) # 类型统一，均用列表套字符串
+        else:
+            knowledge_chunks=[data]
+        return [(chunk,{"granularity":"coarse"}) for chunk in knowledge_chunks]
+
+    def split_fine(self,data:str)->list[tuple[str,dict]]:
+        """细粒度切分：按标题切，每个小节一个文本段，文档没有标题结构时返回空列表"""
+        chunks=[]
+        for titles,body in split_by_heading(data):
+            if not titles:
+                continue      # 不属于任何标题的正文已被粗粒度覆盖
+            title=format_heading_path(titles)
+            chunk_metadata={"granularity":"fine","title":title}
+            # 每个文本段都带上标题路径，保证单独被检索到时上下文完整
+            prefix=title + "\n"
+            if len(prefix + body) > chunk_size:
+                # 单个小节过长，在小节内部继续切分
+                chunks.extend((prefix + piece,chunk_metadata) for piece in self.spliter.split_text(body))
+            else:
+                chunks.append((prefix + body,chunk_metadata))
+        return chunks
+
     def upload_by_str(self,data:str,filename):
         """将传入的字符串，进行向量化，存入向量数据库中"""
         # 先得到出传入的字符串的md5值
         md5_hex=get_string_md5(data)
         if check_md5(md5_hex):
             return "[Repeat] 内容已存在知识库"
-        if len(data) > max_spliter_char_number:
-            knowledge_chunks:list[str]=self.spliter.split_text(data) # 类型统一，均用列表套字符串
-        else:
-            knowledge_chunks=[data]
+        # 两遍切分：粗粒度保留大段上下文，细粒度按标题精确定位
+        chunks=self.split_coarse(data) + self.split_fine(data)
+        knowledge_chunks:list[str]=[chunk for chunk,_ in chunks] # 类型统一，均用列表套字符串
 
         metadata={
             "source":filename,
@@ -80,7 +105,7 @@ class KnowledgeBaseService(object):
         self.chroma.add_texts(        # 内容加载到向量库中
             # iterable-> list \tuple
             knowledge_chunks,
-            metadata=[metadata for _ in knowledge_chunks],
+            metadatas=[{**metadata,**chunk_metadata} for _,chunk_metadata in chunks],
 
         )
         save_md5(md5_hex)
